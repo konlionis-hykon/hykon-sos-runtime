@@ -1,2 +1,3 @@
 # hykon-sos-runtime
 Hykon S-OS is a modular runtime governance architecture for large language models, operating at inference time to enforce stability, epistemic humility, and fail-closed behavior without modifying model weights.
+Hykon S-OS explores a complementary paradigm to training-time alignment: runtime governance at the conversational layer. By treating interaction as a governable execution environment, the system constrains reasoning through structured diagnostics, regulatory escalation, and bounded generation pipelines. This approach enables stability, transparency, and fail-closed behavior without modifying model weights or datasets.
