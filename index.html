@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hykon S-OS: Runtime Governance Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00f5ff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #aaa;
+            font-size: 1.1em;
+        }
+
+        .doi-link {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px 20px;
+            background: rgba(0, 245, 255, 0.08);
+            border: 1px solid rgba(0, 245, 255, 0.35);
+            border-radius: 20px;
+            color: #00f5ff;
+            text-decoration: none;
+            font-size: 0.9em;
+            letter-spacing: 0.03em;
+            transition: all 0.3s;
+        }
+
+        .doi-link:hover {
+            background: rgba(0, 245, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 245, 255, 0.4);
+        }
+
+        .inference-badge {
+            display: inline-block;
+            margin-top: 10px;
+            margin-left: 10px;
+            padding: 6px 16px;
+            background: rgba(255, 0, 255, 0.08);
+            border: 1px solid rgba(255, 0, 255, 0.35);
+            border-radius: 20px;
+            color: #ff80ff;
+            font-size: 0.85em;
+            letter-spacing: 0.03em;
+        }
+
+        .tagline {
+            margin-top: 18px;
+            max-width: 720px;
+            margin-left: auto;
+            margin-right: auto;
+            color: #b0b8cc;
+            font-size: 1.05em;
+            line-height: 1.75;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 16px;
+        }
+
+        .tagline em {
+            color: #00f5ff;
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1em;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00f5ff, #0080ff);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 245, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .visualization {
+            position: relative;
+            min-height: 800px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .layer {
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.5s ease;
+            opacity: 0.4;
+        }
+
+        .layer.active {
+            opacity: 1;
+            border-color: #00f5ff;
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+            transform: scale(1.02);
+        }
+
+        .layer-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .layer-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00f5ff;
+            min-width: 40px;
+        }
+
+        .layer-title {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+
+        .layer-description {
+            color: #ccc;
+            line-height: 1.6;
+            margin-left: 55px;
+        }
+
+        .layer-components {
+            margin-top: 15px;
+            margin-left: 55px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .component {
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .component.active {
+            background: rgba(0, 245, 255, 0.3);
+            border-color: #00f5ff;
+            box-shadow: 0 0 15px rgba(0, 245, 255, 0.5);
+        }
+
+        .flow-indicator {
+            position: absolute;
+            left: 20px;
+            width: 4px;
+            background: linear-gradient(180deg, transparent, #00f5ff, transparent);
+            transition: all 0.8s ease;
+            height: 0;
+            top: 0;
+        }
+
+        .flow-indicator.flowing {
+            height: 100%;
+        }
+
+        .info-panel {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .info-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #00f5ff;
+        }
+
+        .info-content {
+            color: #ccc;
+            line-height: 1.8;
+        }
+
+        .emoji-large {
+            font-size: 1.8em;
+        }
+
+        .status-bar {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-label {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .status-value {
+            color: #00f5ff;
+            font-weight: bold;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulsing {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .layer.entering {
+            animation: slideDown 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Hykon S-OS</h1>
+            <p class="subtitle">Runtime Governance Architecture</p>
+            <a class="doi-link" href="https://doi.org/10.5281/zenodo.18491094" target="_blank" rel="noopener">
+                📄 DOI: 10.5281/zenodo.18491094
+            </a>
+            <span class="inference-badge">⚡ Inference-Time Only — No Weights or Internals Required</span>
+            <p class="tagline">
+                Hykon S-OS provides runtime governance at the conversational layer — a complementary approach to training-time alignment.<br>
+                Enabling stability, epistemic humility, and fail-closed behavior <em>without modifying model weights.</em><br>
+                Designed for integration with middleware frameworks such as LangChain, Haystack, and API routing layers.
+            </p>
+        </header>
+
+        <div class="controls">
+            <button class="btn-primary" id="startBtn">Start Flow</button>
+            <button class="btn-secondary" id="resetBtn">Reset</button>
+            <button class="btn-secondary" id="speedBtn">Speed: Normal</button>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-label">Current Layer:</span>
+                <span class="status-value" id="currentLayer">Ready</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Status:</span>
+                <span class="status-value" id="systemStatus">Idle</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Governance Mode:</span>
+                <span class="status-value" id="govMode">Restrictive-Only (Inference Layer)</span>
+            </div>
+        </div>
+
+        <div class="visualization">
+            <div class="flow-indicator" id="flowIndicator"></div>
+
+            <div class="layer" id="layer1">
+                <div class="layer-header">
+                    <span class="layer-number">1</span>
+                    <span class="layer-title">Interaction Invariants</span>
+                </div>
+                <div class="layer-description">
+                    Entry point for all conversations. Establishes frame contracts and initial constraints.
+                </div>
+                <div class="layer-components">
+                    <span class="component">Frame Contracts</span>
+                    <span class="component">Telemetry Init</span>
+                    <span class="component">Audit Logging</span>
+                </div>
+            </div>
+
+            <div class="layer" id="layer2">
+                <div class="layer-header">
+                    <span class="layer-number">2</span>
+                    <span class="layer-title">Stability Assessment (BCSM & LTD-01)</span>
+                </div>
+                <div class="layer-description">
+                    Diagnostic layer monitoring structural integrity, identity coherence, and response strain patterns.
+                </div>
+                <div class="layer-components">
+                    <span class="component">BCSM: Identity Coherence</span>
+                    <span class="component">BCSM: Boundary Elasticity</span>
+                    <span class="component">BCSM: Recursion Strain</span>
+                    <span class="component">LTD-01: Strain Classification</span>
+                </div>
+            </div>
+
+            <div class="layer" id="layer3">
+                <div class="layer-header">
+                    <span class="layer-number">3</span>
+                    <span class="layer-title">Regulatory Layer <span class="emoji-large">🐨 → 🛟 → 🛡️</span></span>
+                </div>
+                <div class="layer-description">
+                    Monotonic escalation path enforcing epistemic humility, stability dampening, and fail-closed containment.
+                </div>
+                <div class="layer-components">
+                    <span class="component">🐨 Epistemic Humility</span>
+                    <span class="component">🛟 Turbulence Dampening</span>
+                    <span class="component">🛡️ Fail-Closed Containment</span>
+                </div>
+            </div>
+
+            <div class="layer" id="layer4">
+                <div class="layer-header">
+                    <span class="layer-number">4</span>
+                    <span class="layer-title">Constructive Reasoning Pipeline</span>
+                </div>
+                <div class="layer-description">
+                    Bounded content generation with fixed entry, controlled recursion, and mandatory closure.
+                </div>
+                <div class="layer-components">
+                    <span class="component">◌ Entry</span>
+                    <span class="component">⁂ Exploration</span>
+                    <span class="component">☉ Illumination</span>
+                    <span class="component">🔁 Recursion</span>
+                    <span class="component">🜂 Integration</span>
+                    <span class="component">⚭ Closure</span>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <div class="info-title">Current Status</div>
+                <div class="info-content" id="infoContent">
+                    Click "Start Flow" to simulate a conversation passing through the Hykon S-OS governance layers. Each layer processes the input sequentially, applying restrictive-only constraints without modifying the underlying model.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        let isRunning = false;
+        let speed = 1500; // milliseconds per step
+        let speedMode = 'normal';
+
+        const layers = [
+            {
+                id: 'layer1',
+                name: 'Interaction Invariants',
+                info: 'Establishing conversational frame and initial constraints. All inputs must pass through this entry point.',
+                components: ['Frame Contracts', 'Telemetry Init', 'Audit Logging']
+            },
+            {
+                id: 'layer2',
+                name: 'Stability Assessment',
+                info: 'BCSM monitoring structural integrity. LTD-01 classifying response strain patterns. Diagnostic-only — no modification of base model weights or policies.',
+                components: ['BCSM: Identity Coherence', 'BCSM: Boundary Elasticity', 'BCSM: Recursion Strain', 'LTD-01: Strain Classification']
+            },
+            {
+                id: 'layer3',
+                name: 'Regulatory Layer',
+                info: 'Monotonic escalation enforced. 🐨 Koala ensures epistemic humility. If instability detected, 🛟 Lifebuoy dampens turbulence. Critical failures trigger 🛡️ Shield for fail-closed containment.',
+                components: ['🐨 Epistemic Humility', '🛟 Turbulence Dampening', '🛡️ Fail-Closed Containment']
+            },
+            {
+                id: 'layer4',
+                name: 'Constructive Reasoning',
+                info: 'Content generation within bounded pipeline. ◌ Entry → ⁂ Exploration → ☉ Illumination → 🔁 Recursion (bounded) → 🜂 Integration → ⚭ Mandatory Closure. No runaway generation possible.',
+                components: ['◌ Entry', '⁂ Exploration', '☉ Illumination', '🔁 Recursion', '🜂 Integration', '⚭ Closure']
+            }
+        ];
+
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const speedBtn = document.getElementById('speedBtn');
+        const flowIndicator = document.getElementById('flowIndicator');
+        const currentLayerDisplay = document.getElementById('currentLayer');
+        const systemStatus = document.getElementById('systemStatus');
+        const infoContent = document.getElementById('infoContent');
+
+        startBtn.addEventListener('click', startFlow);
+        resetBtn.addEventListener('click', resetFlow);
+        speedBtn.addEventListener('click', toggleSpeed);
+
+        function toggleSpeed() {
+            if (speedMode === 'normal') {
+                speedMode = 'fast';
+                speed = 800;
+                speedBtn.textContent = 'Speed: Fast';
+            } else if (speedMode === 'fast') {
+                speedMode = 'slow';
+                speed = 2500;
+                speedBtn.textContent = 'Speed: Slow';
+            } else {
+                speedMode = 'normal';
+                speed = 1500;
+                speedBtn.textContent = 'Speed: Normal';
+            }
+        }
+
+        function startFlow() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            currentStep = 0;
+            startBtn.disabled = true;
+            systemStatus.textContent = 'Processing';
+            flowIndicator.style.height = '0';
+            
+            processNextLayer();
+        }
+
+        function processNextLayer() {
+            if (currentStep >= layers.length) {
+                completeFlow();
+                return;
+            }
+
+            const layer = layers[currentStep];
+            const layerElement = document.getElementById(layer.id);
+            
+            // Activate layer
+            layerElement.classList.add('active', 'entering');
+            currentLayerDisplay.textContent = layer.name;
+            infoContent.textContent = layer.info;
+
+            // Animate flow indicator
+            const layerTop = layerElement.offsetTop;
+            const layerHeight = layerElement.offsetHeight;
+            flowIndicator.style.top = layerTop + 'px';
+            flowIndicator.style.height = layerHeight + 'px';
+
+            // Activate components sequentially
+            const components = layerElement.querySelectorAll('.component');
+            components.forEach((comp, idx) => {
+                setTimeout(() => {
+                    comp.classList.add('active');
+                }, idx * (speed / 4));
+            });
+
+            // Move to next layer
+            setTimeout(() => {
+                layerElement.classList.remove('entering');
+                currentStep++;
+                processNextLayer();
+            }, speed);
+        }
+
+        function completeFlow() {
+            systemStatus.textContent = 'Complete ✓';
+            currentLayerDisplay.textContent = 'Flow Complete';
+            infoContent.textContent = 'Conversation processed through diagnostic and regulatory layers. Output generated within bounded constraints. No base model parameters modified. System ready for next interaction.';
+            startBtn.disabled = false;
+            isRunning = false;
+        }
+
+        function resetFlow() {
+            isRunning = false;
+            currentStep = 0;
+            startBtn.disabled = false;
+            systemStatus.textContent = 'Idle';
+            currentLayerDisplay.textContent = 'Ready';
+            infoContent.textContent = 'Click "Start Flow" to simulate a conversation passing through the Hykon S-OS governance layers. Each layer processes the input sequentially, applying restrictive-only constraints without modifying the underlying model.';
+            flowIndicator.style.height = '0';
+
+            // Deactivate all layers and components
+            document.querySelectorAll('.layer').forEach(layer => {
+                layer.classList.remove('active', 'entering');
+            });
+            document.querySelectorAll('.component').forEach(comp => {
+                comp.classList.remove('active');
+            });
+        }
+    </script>
+</body>
+</html>
