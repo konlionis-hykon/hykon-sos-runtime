@@ -1,5 +1,5 @@
 This repository contains an interactive architecture visualiser for the Hykon S-OS runtime governance system.
-
+![Hykon S-OS Architecture](docs/hykon-sos-architecture.png)
 Hykon S-OS is a modular inference-time governance architecture for large language models. Instead of modifying model weights or training data, it explores a complementary approach: runtime control at the conversational layer, where interaction is treated as a governable execution environment.
 
 The visualiser illustrates how the Hykon architecture separates conversational governance into modular components, including:
