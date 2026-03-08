@@ -1,7 +1,27 @@
-Hykon S-OS is a modular runtime governance architecture for large language models that operates entirely at inference time. It enforces conversational stability, epistemic humility, and fail-closed behaviour without modifying model weights, training data, or underlying model architectures.
+This repository contains an interactive architecture visualiser for the Hykon S-OS runtime governance system.
 
-Rather than relying solely on training-time alignment, Hykon S-OS explores a complementary paradigm: runtime governance at the conversational layer. By treating interaction as a governable execution environment, the system constrains reasoning through structured diagnostics, trajectory classification, regulatory escalation, and bounded generation pipelines.
+Hykon S-OS is a modular inference-time governance architecture for large language models. Instead of modifying model weights or training data, it explores a complementary approach: runtime control at the conversational layer, where interaction is treated as a governable execution environment.
 
-This repository also includes an interactive visualiser that demonstrates the runtime execution loop, diagnostic state transitions, and regulatory decision pathways of the Hykon S-OS architecture.
+The visualiser illustrates how the Hykon architecture separates conversational governance into modular components, including:
 
-The visualiser provides a simplified simulation of the system’s layered pipeline — allowing users to explore how modules such as SOM, BCSM, LTD-01, the Stability Operator, and the Guardian gate interact during conversational execution.
+NFV (Narrative Flow Validator) — adversarial pre-wrapper and trajectory risk monitor
+
+SOM (Structural Observation Module) — structural telemetry extraction
+
+BCSM (Boundary-Coherence Structural Module) — conversational state estimation
+
+LTD-01 (Latent Trajectory Dynamics) — trajectory classification
+
+HBE (Humility Balance Engine) — epistemic perturbation operator
+
+Stability Operator — trajectory damping controller
+
+Guardian Protocol — invariant-enforcing safety gate
+
+Symbol Code — bounded reasoning execution
+
+Metrics + Audit — runtime traceability and governance feedback
+
+The visualiser demonstrates the runtime execution loop of the architecture, allowing users to explore how telemetry, structural modelling, trajectory control, and safety enforcement interact during conversational execution.
+
+It presents the system both as a modular AI governance pipeline and as a cybernetic conversational control loop, offering an accessible way to understand the architecture described in the Hykon Stability & Alignment Suite.
