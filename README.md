@@ -5,13 +5,21 @@ This repository contains an interactive architecture visualiser for the Hykon S-
 The visualiser illustrates how the Hykon architecture separates conversational governance into modular components, including:
 
 NFV (Narrative Flow Validator) — adversarial pre-wrapper and trajectory risk monitor
+
 SOM (Structural Observation Module) — structural telemetry extraction
+
 BCSM (Boundary-Coherence Structural Module) — conversational state estimation
+
 LTD-01 (Latent Trajectory Dynamics) — trajectory classification
+
 HBE (Humility Balance Engine) — epistemic perturbation operator
+
 Stability Operator — trajectory damping controller
+
 Guardian Protocol — invariant-enforcing safety gate
+
 Symbol Code — bounded reasoning execution
+
 Metrics + Audit — runtime traceability and governance feedback
 
 The visualiser provides an interactive model of the architecture’s runtime loop, allowing users to explore how telemetry, structural modelling, trajectory control, and safety gating may interact during conversational execution.
